@@ -29,3 +29,41 @@ oc describe bc/[build-config-name]
 oc set build-hook bc/[build-config-name] --post-commit --command -- exec python smthg.py 
 oc start-build bc/[build-config-name]
 ```
+
+
+## No3. 
+
+```docker
+FROM registry.access.redhat.com/rhscl/nodejs-6-rhel7
+EXPOSE 3000
+# Make all Node.js apps use /opt/app-root as the main folder (APP_ROOT).
+RUN yum --disablerepo=* --enablerepo="rhel-7-server-rpms" && \
+    yum update && \
+    yum install -y httpd && \
+    yum clean all -y && \
+    mkdir -p /opt/app-root/
+
+WORKDIR /opt/app-root
+
+# Copy the package.json to APP_ROOT
+ONBUILD COPY package.json /opt/app-root
+
+# Install the dependencies
+ONBUILD RUN npm install
+
+# Copy the app source code to APP_ROOT
+ONBUILD COPY src /opt/app-root
+
+# Start node server on port 3000
+CMD [ "npm", "start" ]
+
+RUN chgrp -R 0 directory && chmod -R g=u directory
+```
+
+Service Account
+
+```sh
+oc create serviceaccount myserviceaccount
+oc patch dc/demo-app --patch '{"spec":{"template":{"spec":{"serviceAccountName": "myserviceaccount"}}}}'
+oc adm policy add-scc-to-user anyuid -z myserviceaccount
+```
