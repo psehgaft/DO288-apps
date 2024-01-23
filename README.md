@@ -70,6 +70,10 @@ oc adm policy add-scc-to-user anyuid -z myserviceaccount
 
 ## No5. 
 
+```sh
+podman build --layers=false -t do288-hello-java ./hello-java
+```
+
 ```docker
 FROM registry.access.redhat.com/ubi8/ubi:8.0 1
 
@@ -109,4 +113,18 @@ USER 1001
 
 # Launch httpd
 CMD /usr/sbin/httpd -DFOREGROUND
+```
+
+
+## No6. 
+
+```sh
+oc patch configmap/myconf --patch '{"data":{"key1":"newvalue1"}}'
+oc patch secret/mysecret --patch '{"data":{"password":"bmV3cGFzc3dvcmQK"}}'
+
+oc set env deployment/mydcname --from configmap/myconf
+oc set volume deployment/mydcname --add -t configmap -m /path/to/mount/volume --name myvol --configmap-name myconf
+
+oc set env deployment/mydcname --from secret/mysecret
+oc set volume deployment/mydcname --add -t secret -m /path/to/mount/volume --name myvol --secret-name mysecret
 ```
