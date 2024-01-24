@@ -119,8 +119,8 @@ CMD /usr/sbin/httpd -DFOREGROUND
 ## No6. 
 
 ```sh
-oc patch configmap/myconf --patch '{"data":{"key1":"newvalue1"}}'
-oc patch secret/mysecret --patch '{"data":{"password":"bmV3cGFzc3dvcmQK"}}'
+oc patch configmap/myconf --patch '{"data":{"key1":""}}'
+oc patch secret/mysecret --patch '{"data":{"password":""}}'
 
 oc set env deployment/mydcname --from configmap/myconf
 oc set volume deployment/mydcname --add -t configmap -m /path/to/mount/volume --name myvol --configmap-name myconf
