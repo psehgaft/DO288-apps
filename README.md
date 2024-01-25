@@ -14,11 +14,23 @@ oc start-buld -follow bc/[build-config-name]
 ## No2. 
 
 ```sh
+podman run --name test -it rhscl/httpd-24-rhel7 bash
+
 vi [dir].s2i/bin/assemble
--- CUSTOMIZATONS -- 
-cp -Rf [old-path]/*.html ./
-DATE= `date "+%b %d, %Y"`
-echo "[text] $DATE" >> ./info.html
+
+ CUSTOMIZATION STARTS HERE 
+
+echo "---> Installing application source"
+cp -Rf /tmp/src/*.html ./
+
+DATE=date "+%b %d, %Y @ %H:%M %p"
+
+echo "---> Creating info page"
+echo "Page built on $DATE" >> ./info.html
+echo "Proudly served by Apache HTTP Server version $HTTPD_VERSION" >> ./info.html
+
+ CUSTOMIZATION ENDS HERE 
+
 oc new-app --name [name] httpd:2.4~[git-url]#[git-branch] --context-dir[git-context-dir]
 ```
 
@@ -115,7 +127,6 @@ USER 1001
 CMD /usr/sbin/httpd -DFOREGROUND
 ```
 
-
 ## No6. 
 
 ```sh
@@ -127,4 +138,59 @@ oc set volume deployment/mydcname --add -t configmap -m /path/to/mount/volume --
 
 oc set env deployment/mydcname --from secret/mysecret
 oc set volume deployment/mydcname --add -t secret -m /path/to/mount/volume --name myvol --secret-name mysecret
+```
+
+## No7. 
+
+```sh
+
+oc set probe deployment probes --liveness --get-url=http://:8080/healthz --initial-delay-seconds=2 --timeout-seconds=2
+oc set probe deployment probes --readiness --get-url=http://:8080/ready --initial-delay-seconds=2 --timeout-seconds=2
+
+```
+
+## No8. 
+
+```sh
+
+helm create app1
+
+vi values.yaml
+
+mariadb:
+  auth:
+    username: quotes
+    password: quotespwd
+    database: quotesdb
+  primary:
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+
+vi templates/deployment.yml
+
+imagePullPolicy: {{ .Values.image.pullPolicy }}
+env:
+  {{- range .Values.env }}
+- name: {{ .name }}
+  value: {{ .value }}
+  {{- end }}
+
+vi chart.yaml
+
+dependencies:
+- name: mariadb
+  version: 11.0.13
+  repository: https://charts.bitnami.com/bitnami
+
+helm dependency update
+
+```
+## No9. 
+
+```sh
+
+
+
 ```
