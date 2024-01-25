@@ -125,6 +125,9 @@ USER 1001
 
 # Launch httpd
 CMD /usr/sbin/httpd -DFOREGROUND
+
+
+oc patch dc/demo-app --patch '{"spec":{"template":{"spec":{"serviceAccountName": "myserviceaccount"}}}}'
 ```
 
 ## No6. 
